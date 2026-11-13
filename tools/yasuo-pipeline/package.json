@@ -1,0 +1,19 @@
+{
+  "name": "yasuo-pipeline",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "download": "node download-glb.mjs",
+    "render": "node render-sheet.mjs hd",
+    "render-attack": "node render-attack.mjs",
+    "render-w": "node render-w-wall.mjs",
+    "render:legacy": "node render-sheet.mjs legacy",
+    "inspect": "node inspect-glb.mjs work/yasuo_skin0_khada.glb",
+    "download-spells": "node download-spell-vfx.mjs"
+  },
+  "devDependencies": {
+    "playwright": "^1.52.0",
+    "sharp": "^0.34.1",
+    "three": "^0.172.0"
+  }
+}

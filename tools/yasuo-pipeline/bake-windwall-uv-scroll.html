@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Yasuo W mesh UV scroll bake</title>
+    <style>
+      body {
+        margin: 0;
+        background: transparent;
+      }
+      canvas {
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="c"></canvas>
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://cdn.jsdelivr.net/npm/three@0.172.0/build/three.module.js",
+          "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.172.0/examples/jsm/"
+        }
+      }
+    </script>
+    <script type="module">
+      import * as THREE from 'three'
+      import { OBJLoader } from 'three/addons/loaders/OBJLoader.js'
+
+      const params = new URLSearchParams(location.search)
+      const objUrl = params.get('obj')
+      const texUrl = params.get('tex')
+      const sideObjUrl = params.get('sideObj')
+      const outW = Number(params.get('w') ?? 384)
+      const outH = Number(params.get('h') ?? 224)
+      const rotY = Number(params.get('rotY') ?? Math.PI / 2)
+      const fill = Number(params.get('fill') ?? 0.92)
+
+      const canvas = document.getElementById('c')
+      const renderer = new THREE.WebGLRenderer({
+        canvas,
+        antialias: true,
+        alpha: true,
+        premultipliedAlpha: false,
+        preserveDrawingBuffer: true,
+      })
+      renderer.setPixelRatio(1)
+      renderer.setSize(outW, outH, false)
+      renderer.outputColorSpace = THREE.SRGBColorSpace
+      renderer.setClearColor(0x000000, 0)
+
+      const scene = new THREE.Scene()
+      const aspect = outW / outH
+      const orthoHalf = 3.25
+      const camera = new THREE.OrthographicCamera(
+        -orthoHalf * aspect,
+        orthoHalf * aspect,
+        orthoHalf,
+        -orthoHalf,
+        0.05,
+        200,
+      )
+      const CAM_DIST = 26
+      const CAM_TILT = 0.42
+      camera.position.set(0, Math.cos(CAM_TILT) * CAM_DIST, Math.sin(CAM_TILT) * CAM_DIST)
+      camera.up.set(0, 1, 0)
+      camera.lookAt(0, 1.08, 0)
+
+      const loader = new OBJLoader()
+      const texLoader = new THREE.TextureLoader()
+
+      let scrollTex = null
+      let group = null
+
+      function fitGroup(g) {
+        g.rotation.set(0, rotY, 0)
+        g.updateMatrixWorld(true)
+        const box = new THREE.Box3().setFromObject(g)
+        const size = new THREE.Vector3()
+        box.getSize(size)
+        const center = new THREE.Vector3()
+        box.getCenter(center)
+        const maxDim = Math.max(size.x, size.y, size.z, 0.001)
+        const scale = (orthoHalf * 2 * fill) / maxDim
+        g.scale.setScalar(scale)
+        g.position.set(-center.x * scale, -center.y * scale + 1.06, -center.z * scale)
+      }
+
+      function applyMat(obj, tex) {
+        obj.traverse((c) => {
+          if (!c.isMesh) return
+          c.material = new THREE.MeshBasicMaterial({
+            map: tex,
+            transparent: true,
+            depthWrite: false,
+            side: THREE.DoubleSide,
+          })
+        })
+      }
+
+      window.__yasuoWallUvBake = { ready: false }
+
+      Promise.all([
+        loader.loadAsync(objUrl),
+        sideObjUrl ? loader.loadAsync(sideObjUrl) : Promise.resolve(null),
+        texLoader.loadAsync(texUrl),
+      ])
+        .then(([mainObj, sideObj, tex]) => {
+          scrollTex = tex.clone()
+          scrollTex.colorSpace = THREE.SRGBColorSpace
+          scrollTex.wrapS = THREE.RepeatWrapping
+          scrollTex.wrapT = THREE.RepeatWrapping
+          scrollTex.repeat.set(1, 1)
+          scrollTex.needsUpdate = true
+
+          group = new THREE.Group()
+          applyMat(mainObj, scrollTex)
+          group.add(mainObj)
+          if (sideObj) {
+            applyMat(sideObj, scrollTex)
+            group.add(sideObj)
+          }
+          fitGroup(group)
+          scene.add(group)
+
+          window.__yasuoWallUvBake.renderFrame = (uvOffset) => {
+            scrollTex.offset.set(uvOffset, uvOffset * 0.15)
+            scrollTex.needsUpdate = true
+            renderer.render(scene, camera)
+            return canvas.toDataURL('image/png')
+          }
+          window.__yasuoWallUvBake.ready = true
+          window.__yasuoWallUvBake.renderFrame(0)
+        })
+        .catch((err) => {
+          window.__yasuoWallUvBake.error = String(err)
+        })
+    </script>
+  </body>
+</html>

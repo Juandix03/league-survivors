@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Preview — Minions (investigación)</title>
+    <style>
+      .legal-banner {
+        background: #3b1818;
+        color: #fecaca;
+        padding: 0.5rem 1rem;
+        font-size: 0.85rem;
+        border-bottom: 1px solid #7f1d1d;
+      }
+      .legal-banner strong {
+        color: #fff;
+      }
+      #riot-gallery {
+        padding: 0.75rem 1rem;
+        background: #1a1a22;
+        border-bottom: 1px solid #444;
+      }
+      #riot-gallery.hidden {
+        display: none;
+      }
+      #riot-gallery-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 0.75rem;
+      }
+      .riot-card {
+        margin: 0;
+        font-size: 0.75rem;
+        color: #aab;
+      }
+      .riot-card img {
+        width: 100%;
+        height: auto;
+        image-rendering: pixelated;
+        background: #111;
+        border: 1px solid #333;
+      }
+      #baked-toolbar.hidden,
+      #baked-sheet-note.hidden {
+        display: none;
+      }
+      #baked-toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        background: #252530;
+        border-bottom: 1px solid #444;
+        align-items: center;
+      }
+      #baked-toolbar span {
+        font-size: 0.85rem;
+        color: #aab;
+        margin-right: 0.25rem;
+      }
+      #baked-sheet-note {
+        padding: 0.45rem 1rem;
+        font-size: 0.8rem;
+        color: #cbd5e1;
+        background: #1e1e28;
+        border-bottom: 1px solid #333;
+        line-height: 1.45;
+      }
+      #baked-sheet-note code {
+        font-size: 0.78rem;
+        color: #fde68a;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="legal-banner">
+      <strong>Proyecto fan / for fun.</strong> Modo <em>Riot</em> = iconos square oficiales del HUD (128²).
+      Assets de Riot Games — no endorsement. Para bake 3D top-down futuro: <code>tools/jinx-pipeline</code>.
+    </div>
+    <header class="toolbar">
+      <h1>League Survivors · preview minions</h1>
+      <p id="mode-label">…</p>
+      <button type="button" id="btn-art-baked" class="active">Bake 3D (8 SR)</button>
+      <button type="button" id="btn-art-riot">Riot (HUD square)</button>
+      <button type="button" id="btn-art-inspired">Inspired (propio)</button>
+      <button type="button" id="btn-riot-gallery">Atlases 3D (CDN)</button>
+      <button type="button" id="btn-hide-gallery">Ocultar galería</button>
+      <p>
+        Juego: <a href="/">/</a>
+        · Pradera: <a href="/meadow-preview.html">meadow-preview.html</a>
+      </p>
+    </header>
+    <div id="baked-toolbar" class="hidden" aria-label="Animación spritesheet">
+      <span>Fila del bake 4×4:</span>
+      <button type="button" id="btn-baked-idle" class="active">Idle (fila 1)</button>
+      <button type="button" id="btn-baked-walk-down">Movimiento ↓ (fila 2)</button>
+      <button type="button" id="btn-baked-walk-up">Movimiento ↑ (fila 3)</button>
+      <button type="button" id="btn-baked-walk-side">Movimiento → (fila 4)</button>
+    </div>
+    <p id="baked-sheet-note" class="hidden">
+      Disposición del PNG 256×256 (ver <code>render-minion-sheet.mjs</code>): fila 1 = idle;
+      filas 2–4 = mismo clip de movimiento con rotación ↓ / ↑ / →. No hay fila de ataque
+      dedicada: los <strong>siege</strong> re-bakeados usan <code>Run</code> en filas 2–4. En
+      <strong>chaos-melee</strong> y algunos
+      casters el clip de filas 2–4 puede ser <code>Win1</code> en lugar de carrera.
+    </p>
+    <section id="riot-gallery" class="hidden" aria-label="Referencias Riot">
+      <p>Atlases diffuse (~512²) — no son sprites top-down listos.</p>
+      <div id="riot-gallery-grid"></div>
+    </section>
+    <div id="game"></div>
+    <script type="module" src="/src/minionPreview/main.ts"></script>
+  </body>
+</html>

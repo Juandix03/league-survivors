@@ -1,0 +1,56 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, sans-serif;
+  background: #121218;
+  color: #eee;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.65rem 1rem;
+  background: #1e1e28;
+  border-bottom: 1px solid #333;
+}
+
+.toolbar h1 {
+  font-size: 1rem;
+  margin: 0;
+  font-weight: 600;
+}
+
+.toolbar p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #aab;
+}
+
+.toolbar a {
+  color: #7eb8ff;
+}
+
+.toolbar button {
+  border: 1px solid #555;
+  background: #2a2a36;
+  color: #eee;
+  padding: 0.35rem 0.75rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.toolbar button.active {
+  border-color: #6af;
+  background: #283448;
+}
+
+#game {
+  width: 100vw;
+  height: calc(100vh - 56px);
+}

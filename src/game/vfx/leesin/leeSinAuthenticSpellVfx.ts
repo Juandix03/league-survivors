@@ -1,0 +1,83 @@
+/** CommunityDragon Lee Sin base particles. */
+export const LEESIN_SPELL_PARTICLE_VFX = {
+  baHit: 'leesin-spell-ba-hit',
+  baSwoosh: 'leesin-spell-ba-swoosh',
+  qMis: 'leesin-spell-q-mis',
+  qMisOrb: 'leesin-spell-q-mis-orb',
+  qMisTrail: 'leesin-spell-q-mis-trail',
+  qOrb: 'leesin-spell-q-orb',
+  qBlue: 'leesin-spell-q-blue',
+  qTrail: 'leesin-spell-q-trail',
+  qShock: 'leesin-spell-q-shock',
+  qGlow: 'leesin-spell-q-glow',
+  qMark: 'leesin-spell-q-mark',
+  qMarkOutline: 'leesin-spell-q-mark-outline',
+  qMarkFloor: 'leesin-spell-q-mark-floor',
+  wShield: 'leesin-spell-w-shield',
+  wShieldMagic: 'leesin-spell-w-shield-magic',
+  wRing: 'leesin-spell-w-ring',
+  wGlow: 'leesin-spell-w-glow',
+  wIron: 'leesin-spell-w-iron',
+  wFloor: 'leesin-spell-w-floor',
+  eSymbol: 'leesin-spell-e-symbol',
+  eSparks: 'leesin-spell-e-sparks',
+  eRing: 'leesin-spell-e-ring',
+  eFlashRing: 'leesin-spell-e-flash-ring',
+  eFlash: 'leesin-spell-e-flash',
+  eDragon: 'leesin-spell-e-dragon',
+  rTrail: 'leesin-spell-r-trail',
+  rFlameTrail: 'leesin-spell-r-flame-trail',
+  rGlow: 'leesin-spell-r-glow',
+  rHit: 'leesin-spell-r-hit',
+  rFlameHead: 'leesin-spell-r-flame-head',
+  rSmoke: 'leesin-spell-r-smoke',
+} as const
+
+const SPELL = '/assets/vfx/leesin/spells'
+const BA = '/assets/vfx/leesin'
+
+export const LEESIN_SPELL_PARTICLE_FILES: Record<keyof typeof LEESIN_SPELL_PARTICLE_VFX, string> = {
+  baHit: `${BA}/leesin_base_ba_hiteffect.png`,
+  baSwoosh: `${BA}/leesin_base_air_swoosh.png`,
+  qMis: `${SPELL}/base_leesin_q_mis_front.png`,
+  qMisOrb: `${SPELL}/base_leesin_q_mis_orb_02.png`,
+  qMisTrail: `${SPELL}/base_leesin_q_mis_trail.png`,
+  qOrb: `${SPELL}/leesin_base_q_ball01.png`,
+  qBlue: `${SPELL}/leesin_base_q_bluesphere.png`,
+  qTrail: `${SPELL}/leesin_base_q_smoketrail_02.png`,
+  qShock: `${SPELL}/leesin_base_q_shockwave.png`,
+  qGlow: `${SPELL}/leesin_base_q_glow-soft.png`,
+  qMark: `${SPELL}/base_leesin_q_mark_01.png`,
+  qMarkOutline: `${SPELL}/base_leesin_q_mark_outline_01.png`,
+  qMarkFloor: `${SPELL}/base_leesin_q_mark_floor_01.png`,
+  wShield: `${SPELL}/leesin_base_w_shield_1.png`,
+  wShieldMagic: `${SPELL}/base_leesin_w_shield_magic.png`,
+  wRing: `${SPELL}/leesin_base_w_bigring_02.png`,
+  wGlow: `${SPELL}/leesin_base_w_glow_outer.png`,
+  wIron: `${SPELL}/leesin_base_w_ironwill_glow.png`,
+  wFloor: `${SPELL}/base_leesin_w_cas_floor.png`,
+  eSymbol: `${SPELL}/leesin_base_e_symbol_01.png`,
+  eSparks: `${SPELL}/leesin_base_e_sparks.png`,
+  eRing: `${SPELL}/leesin_base_e_shockring.png`,
+  eFlashRing: `${SPELL}/leesin_base_e_flash_ring.png`,
+  eFlash: `${SPELL}/leesin_base_e_impact_flash.png`,
+  eDragon: `${SPELL}/base_leesin_e_magicdragon.png`,
+  rTrail: `${SPELL}/leesin_base_r_kick_trail.png`,
+  rFlameTrail: `${SPELL}/leesin_base_r_flametrail_big.png`,
+  rGlow: `${SPELL}/leesin_base_r_glow_01.png`,
+  rHit: `${SPELL}/leesin_base_r_hit_bolts.png`,
+  rFlameHead: `${SPELL}/leesin_base_r_flamehead.png`,
+  rSmoke: `${SPELL}/leesin_base_r_smokeclouds_02.png`,
+}
+
+export const LEESIN_HUD_ICONS = {
+  q: '/assets/hud/leesin/LeeSinQOne.png',
+  w: '/assets/hud/leesin/LeeSinWOne.png',
+  e: '/assets/hud/leesin/LeeSinEOne.png',
+  r: '/assets/hud/leesin/LeeSinR.png',
+} as const
+
+export const LEESIN_HUD_ICONS_Q2 = {
+  q: '/assets/hud/leesin/LeeSinQTwo.png',
+  e: '/assets/hud/leesin/LeeSinETwo.png',
+} as const

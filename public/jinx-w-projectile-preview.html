@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <title>Jinx W — misil (investigación + preview)</title>
+    <style>
+      * { box-sizing: border-box; }
+      body { font-family: system-ui, sans-serif; margin: 0; padding: 1.25rem; background: #0f0f18; color: #eee; }
+      h1 { font-size: 1.15rem; }
+      .note { color: #aab; max-width: 54rem; line-height: 1.5; font-size: 0.9rem; }
+      code { background: #1a2744; padding: 2px 5px; border-radius: 4px; }
+      .row { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 1.25rem; }
+      .panel { flex: 1; min-width: 280px; border: 1px solid #334; border-radius: 8px; overflow: hidden; }
+      .panel h2 { margin: 0; font-size: 0.8rem; padding: 8px 10px; background: #16213e; }
+      .swatches { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; background: #222; min-height: 160px; }
+      .swatch { display: flex; align-items: center; justify-content: center; padding: 12px; position: relative; }
+      .swatch.light { background: #e8e4dc; }
+      .swatch.dark { background: #2a2a2a; }
+      .swatch span { position: absolute; top: 6px; left: 8px; font-size: 10px; opacity: 0.75; }
+      canvas { border-radius: 4px; }
+      ul { color: #cbd5e1; font-size: 0.88rem; max-width: 54rem; }
+    </style>
+  </head>
+  <body>
+    <h1>Jinx W — ¿modelo 3D o partículas?</h1>
+    <p class="note">
+      <strong><code>Jinx_Base_W_Mis</code> no es un .scb.</strong> Es un sistema VFX (<code>VfxSystemDefinitionData</code>)
+      con 12 emisores. El cuerpo «Bullet» usa un <strong>quad</strong> con
+      <code>Jinx_Lightning.tex</code> (<code>jinx_lightning.png</code>, 128×512) y scroll UV vertical
+      (<code>birthUvScrollRate</code> ≈ -5), más rampa <code>Jinx_Base_W_Mis_Bullet_RGB.tex</code> (64×4, tint).
+      No hay <code>Jinx_Base_W_Mis.scb</code> en CommunityDragon. Ver
+      <code>tools/jinx-pipeline/docs/jinx-w-missile-investigation.md</code>.
+    </p>
+    <ul>
+      <li><strong>No es viable</strong> exportar un mesh «misil W» desde el mirror actual sin WAD del cliente + CDTB/scb2obj.</li>
+      <li><strong>En juego</strong> reproducimos el emisor Bullet: TileSprite + scroll + ADD (no atlas 3×3).</li>
+    </ul>
+
+    <div class="row">
+      <div class="panel">
+        <h2>Reproducción in-game (quad + scroll)</h2>
+        <div class="swatches">
+          <div class="swatch light"><span>claro</span><canvas id="c1" width="200" height="120"></canvas></div>
+          <div class="swatch dark"><span>oscuro</span><canvas id="c2" width="200" height="120"></canvas></div>
+        </div>
+      </div>
+      <div class="panel">
+        <h2>Textura original strip (referencia)</h2>
+        <div class="swatches">
+          <div class="swatch light"><span>claro ADD</span><img id="strip" alt="" style="max-height:120px;mix-blend-mode:screen" /></div>
+          <div class="swatch dark"><span>oscuro ADD</span><img id="strip2" alt="" style="max-height:120px;mix-blend-mode:screen" /></div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const STRIP = '/assets/vfx/jinx/spells/jinx_lightning.png'
+      document.getElementById('strip').src = STRIP
+      document.getElementById('strip2').src = STRIP
+
+      function drawBolt(ctx, bg) {
+        ctx.fillStyle = bg
+        ctx.fillRect(0, 0, 200, 120)
+        const img = new Image()
+        img.src = STRIP
+        img.onload = () => {
+          let scroll = 0
+          function frame() {
+            ctx.fillStyle = bg
+            ctx.fillRect(0, 0, 200, 120)
+            ctx.save()
+            ctx.translate(100, 60)
+            ctx.rotate(0)
+            ctx.globalCompositeOperation = 'screen'
+            const w = 18, h = 56
+            ctx.beginPath()
+            ctx.rect(-w / 2, -h * 0.88, w, h)
+            ctx.clip()
+            ctx.drawImage(img, 0, scroll % 512, 128, 512, -w / 2, -h * 0.88, w, h)
+            ctx.restore()
+            scroll += 2.8
+            requestAnimationFrame(frame)
+          }
+          frame()
+        }
+      }
+      drawBolt(document.getElementById('c1').getContext('2d'), '#e8e4dc')
+      drawBolt(document.getElementById('c2').getContext('2d'), '#2a2a2a')
+    </script>
+  </body>
+</html>

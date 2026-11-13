@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Yasuo W horizontal UV scroll bake</title>
+    <style>
+      body {
+        margin: 0;
+        background: transparent;
+      }
+      canvas {
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="c"></canvas>
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://cdn.jsdelivr.net/npm/three@0.172.0/build/three.module.js",
+          "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.172.0/examples/jsm/"
+        }
+      }
+    </script>
+    <script type="module">
+      import * as THREE from 'three'
+      import { OBJLoader } from 'three/addons/loaders/OBJLoader.js'
+
+      const params = new URLSearchParams(location.search)
+      const objUrl = params.get('obj')
+      const texUrl = params.get('tex')
+      const sideObjUrl = params.get('sideObj')
+      const outW = Number(params.get('w') ?? 640)
+      const outH = Number(params.get('h') ?? 168)
+      const rotY = Number(params.get('rotY') ?? -Math.PI / 2)
+      const fill = Number(params.get('fill') ?? 1)
+
+      const canvas = document.getElementById('c')
+      const renderer = new THREE.WebGLRenderer({
+        canvas,
+        antialias: true,
+        alpha: true,
+        premultipliedAlpha: false,
+        preserveDrawingBuffer: true,
+      })
+      renderer.setPixelRatio(1)
+      renderer.setSize(outW, outH, false)
+      renderer.outputColorSpace = THREE.SRGBColorSpace
+      renderer.setClearColor(0x000000, 0)
+
+      const scene = new THREE.Scene()
+      const aspect = outW / outH
+      const orthoHalfY = 36
+      const orthoHalfX = orthoHalfY * aspect
+      const camera = new THREE.OrthographicCamera(
+        -orthoHalfX,
+        orthoHalfX,
+        orthoHalfY,
+        -orthoHalfY,
+        0.05,
+        500,
+      )
+      camera.position.set(140, 54, 0)
+      camera.up.set(0, 1, 0)
+      camera.lookAt(0, 54, 0)
+
+      const loader = new OBJLoader()
+      const texLoader = new THREE.TextureLoader()
+
+      let scrollTex = null
+      let group = null
+
+      function prepMesh(obj, tex) {
+        obj.traverse((c) => {
+          if (!c.isMesh) return
+          c.material = new THREE.MeshBasicMaterial({
+            map: tex,
+            transparent: true,
+            depthWrite: false,
+            side: THREE.DoubleSide,
+          })
+        })
+        obj.rotation.y = rotY
+        return obj
+      }
+
+      function fitGroup(g) {
+        g.updateMatrixWorld(true)
+        const box = new THREE.Box3().setFromObject(g)
+        const size = new THREE.Vector3()
+        box.getSize(size)
+        const center = new THREE.Vector3()
+        box.getCenter(center)
+        const targetW = orthoHalfX * 2 * fill
+        const targetH = orthoHalfY * 2 * fill
+        const scaleX = targetW / Math.max(size.x, 0.001)
+        const scaleY = targetH / Math.max(size.y, 0.001)
+        const scale = Math.min(scaleX, scaleY) * 1.08
+        g.scale.setScalar(scale)
+        g.position.set(-center.x * scale, -center.y * scale + 54, -center.z * scale)
+      }
+
+      window.__yasuoWallHorizBake = { ready: false }
+
+      Promise.all([
+        loader.loadAsync(objUrl),
+        sideObjUrl ? loader.loadAsync(sideObjUrl) : Promise.resolve(null),
+        texLoader.loadAsync(texUrl),
+      ])
+        .then(([mainObj, sideObj, tex]) => {
+          scrollTex = tex.clone()
+          scrollTex.colorSpace = THREE.SRGBColorSpace
+          scrollTex.wrapS = THREE.RepeatWrapping
+          scrollTex.wrapT = THREE.RepeatWrapping
+          scrollTex.repeat.set(1.15, 1)
+          scrollTex.needsUpdate = true
+
+          group = new THREE.Group()
+          group.add(prepMesh(mainObj, scrollTex))
+          if (sideObj) group.add(prepMesh(sideObj, scrollTex))
+          fitGroup(group)
+          scene.add(group)
+
+          window.__yasuoWallHorizBake.renderFrame = (uvOffset) => {
+            scrollTex.offset.set(uvOffset * 1.2, uvOffset * 0.08)
+            scrollTex.needsUpdate = true
+            renderer.render(scene, camera)
+            return canvas.toDataURL('image/png')
+          }
+          window.__yasuoWallHorizBake.ready = true
+          window.__yasuoWallHorizBake.renderFrame(0)
+        })
+        .catch((err) => {
+          window.__yasuoWallHorizBake.error = String(err)
+        })
+    </script>
+  </body>
+</html>

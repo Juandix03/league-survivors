@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <title>Jinx VFX — diagnóstico PNG</title>
+    <style>
+      * { box-sizing: border-box; }
+      body {
+        font-family: system-ui, sans-serif;
+        margin: 0;
+        padding: 1.5rem;
+        background: #1a1a2e;
+        color: #eee;
+      }
+      h1 { font-size: 1.25rem; margin: 0 0 0.5rem; }
+      p.note { color: #aab; max-width: 52rem; line-height: 1.45; font-size: 0.9rem; }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 1rem;
+        margin-top: 1.25rem;
+      }
+      .card {
+        border: 1px solid #334;
+        border-radius: 8px;
+        overflow: hidden;
+        background: #0f0f18;
+      }
+      .card h2 {
+        font-size: 0.8rem;
+        font-weight: 600;
+        margin: 0;
+        padding: 0.5rem 0.65rem;
+        background: #16213e;
+        word-break: break-all;
+      }
+      .card .meta {
+        font-size: 0.75rem;
+        color: #8af;
+        padding: 0.35rem 0.65rem;
+        border-bottom: 1px solid #223;
+      }
+      .swatches {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2px;
+        background: #223;
+      }
+      .swatch {
+        position: relative;
+        min-height: 140px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 8px;
+      }
+      .swatch.light { background: #e8e4dc; }
+      .swatch.dark { background: #2a2a2a; }
+      .swatch span {
+        position: absolute;
+        top: 4px;
+        left: 6px;
+        font-size: 0.65rem;
+        opacity: 0.7;
+      }
+      .swatch img {
+        max-width: 100%;
+        max-height: 120px;
+        image-rendering: auto;
+      }
+      .swatch.add img { mix-blend-mode: screen; }
+    </style>
+  </head>
+  <body>
+    <h1>Jinx VFX — CommunityDragon PNG</h1>
+    <p class="note">
+      Comprobá transparencia en fondo claro/oscuro. Las filas con clase
+      <strong>ADD</strong> simulan blend aditivo (negro = invisible). Muchos
+      archivos son atlases 2×2 o trazadores verticales del motor de partículas
+      de LoL, no sprites listos para Phaser.
+    </p>
+    <div class="grid" id="grid"></div>
+    <script>
+      const BASE = '/assets/vfx/jinx/'
+      const ASSETS = [
+        { file: 'jinx_basic_bullet.png', note: '32×512 trazador vertical (stretch en partículas)', add: false },
+        { file: 'jinx_q_rocket.png', note: '256×256 RGB sin alpha — máscara/additive', add: true },
+        { file: 'jinx_q_rocket_rgb.png', note: '512×8 rampa RGB (tint), no sprite', add: false },
+        { file: 'jinx_q_gun_hit.png', note: '512×512 atlas 2×2 impactos — usar un frame + ADD', add: true },
+        { file: 'jinx_explosion_flat.png', note: '512×512 atlas 2×2 fuego, sin alpha — no sprite único', add: true },
+        { file: 'jinx_explosion_smoke.png', note: 'Humo con alpha real', add: false },
+        { file: 'common_fb_rocket_groundaoe_centerflare.png', note: 'Flare AoE con alpha — ADD ok', add: true },
+        { file: 'jinx_muzzle_flash.png', note: 'Fogonazo con alpha', add: false },
+        { file: 'jinx_base_crater_01.png', note: 'Marca de suelo con alpha', add: false },
+        { file: 'jinx_base_ba_shockring.png', note: 'Anillo blanco/negro — solo ADD', add: true },
+        { file: 'jinx_base_ba_smoke_01.png', note: 'Humo BA con alpha', add: false },
+        { file: 'jinx_bullet_shell.png', note: 'UV map casquillo, no sprite 2D', add: false },
+      ]
+
+      const grid = document.getElementById('grid')
+      for (const a of ASSETS) {
+        const card = document.createElement('article')
+        card.className = 'card'
+        card.innerHTML = `
+          <h2>${a.file}</h2>
+          <div class="meta">${a.note}</div>
+          <div class="swatches">
+            <div class="swatch light ${a.add ? 'add' : ''}"><span>claro</span></div>
+            <div class="swatch dark ${a.add ? 'add' : ''}"><span>oscuro</span></div>
+          </div>`
+        const imgs = card.querySelectorAll('.swatch')
+        imgs.forEach((sw) => {
+          const img = document.createElement('img')
+          img.src = BASE + a.file
+          img.alt = a.file
+          img.onload = () => {
+            const meta = card.querySelector('.meta')
+            meta.textContent = `${a.note} · ${img.naturalWidth}×${img.naturalHeight}px`
+          }
+          sw.appendChild(img)
+        })
+        grid.appendChild(card)
+      }
+    </script>
+  </body>
+</html>

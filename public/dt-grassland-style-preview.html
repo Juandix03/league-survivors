@@ -1,0 +1,431 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <title>Evaluación — Daniel Thomas Grassland (sin integrar)</title>
+    <style>
+      * { box-sizing: border-box; }
+      body {
+        font-family: system-ui, sans-serif;
+        margin: 0;
+        padding: 1.25rem 1.5rem 2rem;
+        background: #1c1c24;
+        color: #e8e8ef;
+        line-height: 1.45;
+      }
+      h1 { font-size: 1.35rem; margin: 0 0 0.35rem; }
+      h2 { font-size: 1.05rem; margin: 1.5rem 0 0.5rem; color: #b8c4ff; }
+      a { color: #7eb8ff; }
+      .warn {
+        border: 1px solid #a86;
+        background: #2a2220;
+        padding: 0.75rem 1rem;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        max-width: 56rem;
+      }
+      .meta {
+        display: grid;
+        gap: 0.35rem;
+        max-width: 56rem;
+        font-size: 0.9rem;
+        color: #bbb;
+      }
+      .meta strong { color: #ddd; }
+      .layout {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin-top: 1rem;
+        max-width: 1200px;
+      }
+      @media (max-width: 900px) { .layout { grid-template-columns: 1fr; } }
+      .panel {
+        border: 1px solid #3a3a48;
+        border-radius: 10px;
+        overflow: hidden;
+        background: #121218;
+      }
+      .panel header {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.85rem;
+        font-weight: 600;
+        background: #252532;
+        border-bottom: 1px solid #333;
+      }
+      .viewport-wrap {
+        position: relative;
+        width: 100%;
+        aspect-ratio: 16 / 10;
+        background: #0a0a0e;
+        overflow: hidden;
+        cursor: crosshair;
+      }
+      canvas.bg { width: 100%; height: 100%; display: block; }
+      .controls {
+        padding: 0.65rem 0.75rem 0.85rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.45rem;
+        font-size: 0.8rem;
+      }
+      label { display: flex; flex-wrap: wrap; align-items: center; gap: 0.35rem 0.5rem; }
+      input[type="range"] { flex: 1; min-width: 120px; }
+      select { max-width: 100%; }
+      .gallery {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 0.5rem;
+      }
+      .gallery button {
+        border: 2px solid #444;
+        padding: 0;
+        border-radius: 6px;
+        background: #222;
+        cursor: pointer;
+        width: 96px;
+        height: 60px;
+        overflow: hidden;
+      }
+      .gallery button.active { border-color: #6af; }
+      .gallery img { width: 100%; height: 100%; object-fit: cover; display: block; }
+      .note { font-size: 0.85rem; color: #9a9ab0; max-width: 56rem; }
+      code { font-size: 0.85em; background: #2a2a34; padding: 0.1em 0.35em; border-radius: 4px; }
+    </style>
+  </head>
+  <body>
+    <h1>Daniel Thomas — Grassland (evaluación previa a compra)</h1>
+    <p class="note">
+      Página aislada: <strong>no modifica</strong> <code>ArenaScene</code> ni el build del juego.
+      Abrí con el dev server: <code>/dt-grassland-style-preview.html</code>
+    </p>
+
+    <div class="warn">
+      <strong>Sin tiles de muestra oficiales.</strong>
+      El autor no publica un demo descargable del pack (solo el ZIP de pago).
+      Las imágenes de fondo aquí son <strong>capturas de marketing</strong> enlazadas desde itch.io y Unity Asset Store —
+      sirven para juzgar estilo y escala, <em>no</em> para usar en el juego ni como sustituto del pack.
+      La prueba técnica real (Tiled + PNG 128×128) requiere comprar el asset.
+    </div>
+
+    <h2>Fuentes oficiales</h2>
+    <div class="meta">
+      <div><strong>itch.io (principal):</strong>
+        <a href="https://danielthomasart.itch.io/2d-hand-painted-dungeon-tileset">2D Hand Painted - Grassland Tileset</a>
+      </div>
+      <div><strong>Compra itch:</strong>
+        <a href="https://danielthomasart.itch.io/2d-hand-painted-dungeon-tileset/purchase">página de purchase</a>
+        — precio en metadata: <strong>13,00 USD</strong> (oct 2026; confirmar en itch antes de pagar).
+      </div>
+      <div><strong>Unity Asset Store:</strong>
+        <a href="https://assetstore.unity.com/packages/2d/environments/2d-hand-painted-grassland-tileset-47763">mismo pack (~14,99 USD)</a>
+        — licencia Unity EULA (distinta a itch; elegir una tienda).
+      </div>
+      <div><strong>Portfolio:</strong> <a href="https://www.danielthomasart.com/">danielthomasart.com</a></div>
+      <div><strong>Uso comercial (itch, autor en comentarios):</strong> sí, en juegos comerciales; <strong>no redistribuir</strong> los archivos del pack.</div>
+      <div><strong>Perspectiva (autor, Unity 2015):</strong> top-down tipo “Zelda”; tiles <strong>128×128 px</strong>.</div>
+    </div>
+
+    <h2>Parámetros de Jinx en League Survivors (runtime actual)</h2>
+    <div class="meta">
+      <div>Hoja por defecto: <code>spritesheet.jpg</code> — frames <strong>64×64</strong>, <code>displayScale: 1.18</code> (~75 px de alto visual).</div>
+      <div>Cuerpo de colisión: radio <strong>22</strong> px; cámara zoom <strong>1</strong>; suelo actual: color plano <code>#6f9e52</code>.</div>
+      <div>Variantes URL <code>?jinxSheet=authentic</code> / <code>authentic-hd</code> usan filtro <code>nearest</code> — peor match con suelo pintado suave.</div>
+    </div>
+
+    <h2>Compositor (Jinx local + fondo de marketing)</h2>
+    <p class="note">
+      Elegí una captura oficial, arrastrá el marcador para colocar a Jinx, y calibrá “px por tile 128” hasta que la cuadrícula coincida con el pasto visible.
+      Compará con el panel “Arena actual” (mismo sprite y escala).
+    </p>
+
+    <div class="layout">
+      <div class="panel">
+        <header>Escenario DT (captura autor — solo referencia)</header>
+        <div class="viewport-wrap" id="dt-view">
+          <canvas class="bg" id="dt-canvas" width="640" height="400"></canvas>
+        </div>
+        <div class="controls" id="dt-controls"></div>
+      </div>
+      <div class="panel">
+        <header>Arena actual (color plano #6f9e52)</header>
+        <div class="viewport-wrap">
+          <canvas class="bg" id="cur-canvas" width="640" height="400"></canvas>
+        </div>
+        <div class="controls">
+          <label>Mismo sprite y escala que el juego (solo vista estática, frame idle).</label>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const PROMO = [
+        {
+          id: 'itch-cover',
+          label: 'itch — portada',
+          src: 'https://img.itch.zone/aW1hZ2UvMjMzMjMyLzExMDcyNDEucG5n/original/hVF7MZ.png',
+          source: 'https://danielthomasart.itch.io/2d-hand-painted-dungeon-tileset',
+        },
+        {
+          id: 'unity-hero',
+          label: 'Unity — hero',
+          src: 'https://assetstorev1-prd-cdn.unity3d.com/key-image/c2f578a4-cd7e-44b3-9c00-a6f0d4362759.jpg',
+          source: 'https://assetstore.unity.com/packages/2d/environments/2d-hand-painted-grassland-tileset-47763',
+        },
+        {
+          id: 'unity-1',
+          label: 'Unity — shot 1',
+          src: 'https://assetstorev1-prd-cdn.unity3d.com/package-screenshot/a7bc6957-84a1-46ed-bf35-d700fd5c39f1_scaled.jpg',
+          source: 'Unity Asset Store',
+        },
+        {
+          id: 'unity-2',
+          label: 'Unity — shot 2',
+          src: 'https://assetstorev1-prd-cdn.unity3d.com/package-screenshot/d6854a00-66ef-4d34-87df-2f043f1fce74_scaled.jpg',
+          source: 'Unity Asset Store',
+        },
+        {
+          id: 'unity-3',
+          label: 'Unity — shot 3',
+          src: 'https://assetstorev1-prd-cdn.unity3d.com/package-screenshot/77877ee5-afe5-46da-8ee9-6a4020cb8341_scaled.jpg',
+          source: 'Unity Asset Store',
+        },
+        {
+          id: 'unity-4',
+          label: 'Unity — shot 4',
+          src: 'https://assetstorev1-prd-cdn.unity3d.com/package-screenshot/cf5cfb6c-b98e-44b9-8994-d6fa8135e067_scaled.jpg',
+          source: 'Unity Asset Store',
+        },
+      ]
+
+      const JINX_SHEETS = {
+        default: {
+          url: '/assets/champions/jinx/spritesheet.jpg',
+          frame: 64,
+          scale: 1.18,
+          originX: 0.5,
+          originY: 0.72,
+          filter: 'smooth',
+        },
+        authentic: {
+          url: '/assets/champions/jinx/spritesheet_authentic_test.png',
+          frame: 64,
+          scale: 1.05 * 1.3,
+          originX: 0.5,
+          originY: 0.68,
+          filter: 'pixel',
+        },
+      }
+
+      const state = {
+        promoIndex: 2,
+        pxPerTile: 42,
+        jinxKey: 'default',
+        jinxX: 320,
+        jinxY: 260,
+        showGrid: true,
+      }
+
+      let bgImg = new Image()
+      let jinxImg = new Image()
+      let jinxReady = false
+
+      const dtCanvas = document.getElementById('dt-canvas')
+      const dtCtx = dtCanvas.getContext('2d')
+      const curCanvas = document.getElementById('cur-canvas')
+      const curCtx = curCanvas.getContext('2d')
+
+      function loadJinx() {
+        const cfg = JINX_SHEETS[state.jinxKey]
+        jinxReady = false
+        jinxImg = new Image()
+        jinxImg.onload = () => {
+          jinxReady = true
+          drawAll()
+        }
+        jinxImg.src = cfg.url
+      }
+
+      function loadPromo(i) {
+        state.promoIndex = i
+        bgImg = new Image()
+        bgImg.onload = () => drawAll()
+        bgImg.onerror = () => {
+          dtCtx.fillStyle = '#311'
+          dtCtx.fillRect(0, 0, dtCanvas.width, dtCanvas.height)
+          dtCtx.fillStyle = '#faa'
+          dtCtx.font = '14px system-ui'
+          dtCtx.fillText('No se pudo cargar imagen remota (CORS/red). Abrí la URL en el navegador.', 12, 28)
+        }
+        bgImg.src = PROMO[i].src
+        document.querySelectorAll('.gallery button').forEach((b, idx) => {
+          b.classList.toggle('active', idx === i)
+        })
+      }
+
+      function drawBackground(ctx, w, h, fillOnly) {
+        if (fillOnly) {
+          ctx.fillStyle = '#6f9e52'
+          ctx.fillRect(0, 0, w, h)
+          return { scale: 1, ox: 0, oy: 0 }
+        }
+        if (!bgImg.complete || !bgImg.naturalWidth) return null
+        const ir = bgImg.naturalWidth / bgImg.naturalHeight
+        const cr = w / h
+        let dw, dh, ox, oy
+        if (ir > cr) {
+          dh = h
+          dw = h * ir
+          ox = (w - dw) / 2
+          oy = 0
+        } else {
+          dw = w
+          dh = w / ir
+          ox = 0
+          oy = (h - dh) / 2
+        }
+        ctx.drawImage(bgImg, ox, oy, dw, dh)
+        return { scale: dw / bgImg.naturalWidth, ox, oy, dw, dh }
+      }
+
+      function drawGrid(ctx, layout) {
+        if (!state.showGrid || !layout) return
+        const step = state.pxPerTile * layout.scale
+        ctx.save()
+        ctx.strokeStyle = 'rgba(255,255,255,0.22)'
+        ctx.lineWidth = 1
+        const x0 = layout.ox
+        const y0 = layout.oy
+        for (let x = x0; x <= layout.ox + layout.dw; x += step) {
+          ctx.beginPath()
+          ctx.moveTo(x, y0)
+          ctx.lineTo(x, y0 + layout.dh)
+          ctx.stroke()
+        }
+        for (let y = y0; y <= layout.oy + layout.dh; y += step) {
+          ctx.beginPath()
+          ctx.moveTo(x0, y)
+          ctx.lineTo(x0 + layout.dw, y)
+          ctx.stroke()
+        }
+        ctx.restore()
+      }
+
+      function drawJinx(ctx, x, y) {
+        if (!jinxReady) return
+        const cfg = JINX_SHEETS[state.jinxKey]
+        const fw = cfg.frame
+        const fh = cfg.frame
+        ctx.imageSmoothingEnabled = cfg.filter !== 'pixel'
+        const sw = fw * cfg.scale
+        const sh = fh * cfg.scale
+        const dx = x - sw * cfg.originX
+        const dy = y - sh * cfg.originY
+        ctx.drawImage(jinxImg, 0, 0, fw, fh, dx, dy, sw, sh)
+        ctx.strokeStyle = 'rgba(0,0,0,0.35)'
+        ctx.strokeRect(dx, dy, sw, sh)
+      }
+
+      function drawAll() {
+        const w = dtCanvas.width
+        const h = dtCanvas.height
+        dtCtx.clearRect(0, 0, w, h)
+        const layout = drawBackground(dtCtx, w, h, false)
+        drawGrid(dtCtx, layout)
+        drawJinx(dtCtx, state.jinxX, state.jinxY)
+
+        curCtx.clearRect(0, 0, w, h)
+        drawBackground(curCtx, w, h, true)
+        drawJinx(curCtx, w / 2, h * 0.65)
+      }
+
+      function buildControls() {
+        const root = document.getElementById('dt-controls')
+        root.innerHTML = ''
+
+        const gal = document.createElement('div')
+        gal.className = 'gallery'
+        PROMO.forEach((p, i) => {
+          const btn = document.createElement('button')
+          btn.type = 'button'
+          btn.title = p.label
+          const img = document.createElement('img')
+          img.alt = p.label
+          img.src = p.src
+          btn.appendChild(img)
+          btn.addEventListener('click', () => loadPromo(i))
+          gal.appendChild(btn)
+        })
+        root.appendChild(gal)
+
+        const addRange = (label, min, max, step, get, set) => {
+          const lab = document.createElement('label')
+          const span = document.createElement('span')
+          span.textContent = label
+          const input = document.createElement('input')
+          input.type = 'range'
+          input.min = min
+          input.max = max
+          input.step = step
+          input.value = get()
+          const out = document.createElement('span')
+          out.textContent = get()
+          input.addEventListener('input', () => {
+            set(Number(input.value))
+            out.textContent = input.value
+            drawAll()
+          })
+          lab.append(span, input, out)
+          root.appendChild(lab)
+        }
+
+        addRange('Px en pantalla ≈ 1 tile (128px art)', 18, 90, 1, () => state.pxPerTile, (v) => { state.pxPerTile = v })
+
+        const sel = document.createElement('label')
+        sel.innerHTML = 'Sprite Jinx: '
+        const select = document.createElement('select')
+        ;[
+          ['default', 'Prototipo JPG (default en juego)'],
+          ['authentic', 'Bake authentic (nearest)'],
+        ].forEach(([k, t]) => {
+          const o = document.createElement('option')
+          o.value = k
+          o.textContent = t
+          select.appendChild(o)
+        })
+        select.value = state.jinxKey
+        select.addEventListener('change', () => {
+          state.jinxKey = select.value
+          loadJinx()
+        })
+        sel.appendChild(select)
+        root.appendChild(sel)
+
+        const chk = document.createElement('label')
+        const box = document.createElement('input')
+        box.type = 'checkbox'
+        box.checked = state.showGrid
+        box.addEventListener('change', () => {
+          state.showGrid = box.checked
+          drawAll()
+        })
+        chk.append(box, document.createTextNode(' Cuadrícula 128 px (calibrada)'))
+        root.appendChild(chk)
+      }
+
+      document.getElementById('dt-view').addEventListener('pointerdown', (ev) => {
+        const rect = dtCanvas.getBoundingClientRect()
+        const sx = dtCanvas.width / rect.width
+        const sy = dtCanvas.height / rect.height
+        state.jinxX = (ev.clientX - rect.left) * sx
+        state.jinxY = (ev.clientY - rect.top) * sy
+        drawAll()
+      })
+
+      buildControls()
+      loadJinx()
+      loadPromo(state.promoIndex)
+    </script>
+  </body>
+</html>

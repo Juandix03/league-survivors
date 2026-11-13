@@ -1,0 +1,77 @@
+/**
+ * Curated CommunityDragon spell particles (raw assets for trails/impacts).
+ * Most Ahri missile PNGs are grayscale masks → use ADD + tint in ahriSpellVisuals.
+ */
+export const AHRI_SPELL_PARTICLE_VFX = {
+  baOrbBackground: 'ahri-spell-ba-orb-background',
+  baMote: 'ahri-spell-ba-mote',
+  baTrail: 'ahri-spell-ba-trail',
+  baHitSparks: 'ahri-spell-ba-hit-sparks',
+  baSpeedFlash: 'ahri-spell-ba-speed-flash',
+  qOrbBackground: 'ahri-spell-q-orb-background',
+  qOrbEdge: 'ahri-spell-q-orb-edge',
+  qShape: 'ahri-spell-q-shape',
+  qSpeed: 'ahri-spell-q-speed',
+  qTrail01: 'ahri-spell-q-trail-01',
+  qTrail02: 'ahri-spell-q-trail-02',
+  wOrbFox01: 'ahri-spell-w-orb-fox-01',
+  wOrbFox03: 'ahri-spell-w-orb-fox-03',
+  wFireAtlas: 'ahri-spell-w-fire',
+  wRingflare: 'ahri-spell-w-ringflare',
+  wSmoke: 'ahri-spell-w-smoke',
+  wTrailErode: 'ahri-spell-w-trail-erode',
+  wSmallStarTrail: 'ahri-spell-w-smallstartrail',
+  wRaysMult: 'ahri-spell-w-rays-mult',
+  eHeartScbTex: 'ahri-spell-e-heart-01',
+  eHeart02: 'ahri-spell-e-heart-02',
+  eHeartRibbon: 'ahri-spell-e-heart-ribbon',
+  eTrail: 'ahri-spell-e-trail',
+  eSmoke: 'ahri-spell-e-smoke',
+  eRaysMult: 'ahri-spell-e-rays-mult',
+  rAuraGlow: 'ahri-spell-r-aura-glow',
+  rAirbullet: 'ahri-spell-r-airbullet',
+  rTrail: 'ahri-spell-r-trail',
+  rSmokeTrail: 'ahri-spell-r-smoketrail',
+  rShockblasts: 'ahri-spell-r-shockblasts',
+  rDashBillboard: 'ahri-spell-r-dash-billboard',
+} as const
+
+const SPELL = '/assets/vfx/ahri/spells'
+const BA = '/assets/vfx/ahri'
+
+export const AHRI_SPELL_PARTICLE_FILES: Record<
+  keyof typeof AHRI_SPELL_PARTICLE_VFX,
+  string
+> = {
+  baOrbBackground: `${BA}/ahri_base_ba_orbbackground.png`,
+  baMote: `${BA}/ahri_base_ba_mote_01.png`,
+  baTrail: `${BA}/ahri_base_ba_trail2.png`,
+  baHitSparks: `${BA}/ahri_base_ba_hit_tar_sparks.png`,
+  baSpeedFlash: `${BA}/ahri_base_ba_speed_flash.png`,
+  qOrbBackground: `${SPELL}/ahri_base_q_orbbackground.png`,
+  qOrbEdge: `${SPELL}/ahri_base_q_orbedge.png`,
+  qShape: `${SPELL}/ahri_q_shape.png`,
+  qSpeed: `${SPELL}/ahri_base_q_speed.png`,
+  qTrail01: `${SPELL}/ahri_base_q_trail_01.png`,
+  qTrail02: `${SPELL}/ahri_base_q_trail_02.png`,
+  wOrbFox01: `${SPELL}/ahri_base_orb_fox_01.png`,
+  wOrbFox03: `${SPELL}/ahri_base_orb_fox_03.png`,
+  wFireAtlas: `${SPELL}/ahri_base_w_fire2x2.png`,
+  wRingflare: `${SPELL}/ahri_base_w_ringflare.png`,
+  wSmoke: `${SPELL}/ahri_base_w_smoke_2x2.png`,
+  wTrailErode: `${SPELL}/ahri_base_w_trail_erode.png`,
+  wSmallStarTrail: `${SPELL}/ahri_base_w_smallstartrail.png`,
+  wRaysMult: `${SPELL}/ahri_w_rays_mult.png`,
+  eHeartScbTex: `${SPELL}/ahri_base_e_heart_01.png`,
+  eHeart02: `${SPELL}/ahri_base_e_heart_02.png`,
+  eHeartRibbon: `${SPELL}/ahri_e_heart.png`,
+  eTrail: `${SPELL}/ahri_base_e_trail_01.png`,
+  eSmoke: `${SPELL}/ahri_base_e_smoke_2x2.png`,
+  eRaysMult: `${SPELL}/ahri_e_rays_mult.png`,
+  rAuraGlow: `${SPELL}/ahri_base_r_aura_glow.png`,
+  rAirbullet: `${SPELL}/ahri_base_r_airbullet.png`,
+  rTrail: `${SPELL}/ahri_base_r_trail2.png`,
+  rSmokeTrail: `${SPELL}/ahri_base_r_smoketrail_03.png`,
+  rShockblasts: `${SPELL}/ahri_base_r_shockblasts.png`,
+  rDashBillboard: `${SPELL}/ahridash.png`,
+}

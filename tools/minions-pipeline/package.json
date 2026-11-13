@@ -1,0 +1,15 @@
+{
+  "name": "minions-pipeline",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "extract": "node extract-minion.mjs",
+    "inspect": "node inspect-glb.mjs",
+    "render": "node render-minion-sheet.mjs"
+  },
+  "devDependencies": {
+    "playwright": "^1.52.0",
+    "sharp": "^0.34.1",
+    "three": "^0.172.0"
+  }
+}

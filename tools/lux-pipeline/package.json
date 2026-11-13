@@ -1,0 +1,19 @@
+{
+  "name": "lux-pipeline",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "download": "node download-glb.mjs",
+    "download-spells": "node download-spell-vfx.mjs",
+    "render": "node render-sheet.mjs hd",
+    "inspect": "node inspect-glb.mjs work/lux_skin0_khada.glb"
+  },
+  "devDependencies": {
+    "playwright": "^1.52.0",
+    "sharp": "^0.34.1",
+    "three": "^0.172.0"
+  },
+  "dependencies": {
+    "league-survivors": "file:../.."
+  }
+}

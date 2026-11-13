@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Yasuo wall face bake</title>
+    <style>
+      body {
+        margin: 0;
+        background: transparent;
+      }
+      canvas {
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="c"></canvas>
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://cdn.jsdelivr.net/npm/three@0.172.0/build/three.module.js",
+          "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.172.0/examples/jsm/"
+        }
+      }
+    </script>
+    <script type="module">
+      import * as THREE from 'three'
+      import { OBJLoader } from 'three/addons/loaders/OBJLoader.js'
+
+      const params = new URLSearchParams(location.search)
+      const objUrl = params.get('obj')
+      const texUrl = params.get('tex')
+      const sideObjUrl = params.get('sideObj')
+      const outW = Number(params.get('w') ?? 768)
+      const outH = Number(params.get('h') ?? 384)
+
+      const canvas = document.getElementById('c')
+      const renderer = new THREE.WebGLRenderer({
+        canvas,
+        antialias: true,
+        alpha: true,
+        premultipliedAlpha: false,
+        preserveDrawingBuffer: true,
+      })
+      renderer.setPixelRatio(1)
+      renderer.setSize(outW, outH, false)
+      renderer.outputColorSpace = THREE.SRGBColorSpace
+      renderer.setClearColor(0x000000, 0)
+
+      const scene = new THREE.Scene()
+      const aspect = outW / outH
+      const orthoHalf = 58
+      const camera = new THREE.OrthographicCamera(
+        -orthoHalf * aspect,
+        orthoHalf * aspect,
+        orthoHalf,
+        -orthoHalf,
+        0.05,
+        500,
+      )
+      camera.position.set(120, 55, 0)
+      camera.up.set(0, 1, 0)
+      camera.lookAt(0, 55, 0)
+
+      const loader = new OBJLoader()
+      const texLoader = new THREE.TextureLoader()
+
+      function prepMesh(obj, tex) {
+        tex.colorSpace = THREE.SRGBColorSpace
+        const mat = new THREE.MeshBasicMaterial({
+          map: tex,
+          transparent: true,
+          depthWrite: false,
+          side: THREE.DoubleSide,
+        })
+        obj.traverse((c) => {
+          if (c.isMesh) c.material = mat
+        })
+        obj.rotation.y = -Math.PI / 2
+        return obj
+      }
+
+      window.__yasuoWallFaceBake = { ready: false }
+
+      Promise.all([
+        loader.loadAsync(objUrl),
+        sideObjUrl ? loader.loadAsync(sideObjUrl) : Promise.resolve(null),
+        texLoader.loadAsync(texUrl),
+      ])
+        .then(([mainObj, sideObj, tex]) => {
+          const group = new THREE.Group()
+          group.add(prepMesh(mainObj, tex))
+          if (sideObj) group.add(prepMesh(sideObj, tex))
+          const box = new THREE.Box3().setFromObject(group)
+          const center = box.getCenter(new THREE.Vector3())
+          group.position.sub(center)
+          group.position.y += 55
+          scene.add(group)
+          window.__yasuoWallFaceBake.exportPng = () => {
+            renderer.render(scene, camera)
+            return canvas.toDataURL('image/png')
+          }
+          window.__yasuoWallFaceBake.ready = true
+          renderer.render(scene, camera)
+        })
+        .catch((err) => {
+          window.__yasuoWallFaceBake.error = String(err)
+        })
+    </script>
+  </body>
+</html>

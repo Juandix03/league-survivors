@@ -1,0 +1,23 @@
+{
+  "name": "ahri-pipeline",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "download": "node download-glb.mjs",
+    "render": "node render-sheet.mjs hd",
+    "render:legacy": "node render-sheet.mjs legacy",
+    "render:uhd": "node render-sheet.mjs uhd",
+    "inspect": "node inspect-glb.mjs work/ahri_skin0_khada.glb",
+    "fetch-skin0": "node fetch-skin0-data.mjs",
+    "download-spells": "node download-spell-vfx.mjs",
+    "extract-wad": "node extract-wad-spell-assets.mjs",
+    "export-scb": "node export-scb-objs.mjs",
+    "bake-ba": "node bake-ba-sprite.mjs",
+    "bake-q-orb": "node bake-q-orb-sprite.mjs"
+  },
+  "devDependencies": {
+    "playwright": "^1.52.0",
+    "sharp": "^0.34.1",
+    "three": "^0.172.0"
+  }
+}

@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Yasuo ortho bake</title>
+    <style>
+      body {
+        margin: 0;
+        background: #000;
+      }
+      canvas {
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="c"></canvas>
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://cdn.jsdelivr.net/npm/three@0.172.0/build/three.module.js",
+          "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.172.0/examples/jsm/"
+        }
+      }
+    </script>
+    <script type="module">
+      import * as THREE from 'three'
+      import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
+
+      const params = new URLSearchParams(location.search)
+      const glbUrl = params.get('glb') ?? './work/yasuo_skin0_khada.glb'
+      const frameW = Number(params.get('fw') ?? 256)
+      const frameH = Number(params.get('fh') ?? 256)
+      const fill = Number(params.get('fill') ?? 0.72)
+      const framesPerRow = Number(params.get('fpr') ?? 8)
+      const framePadY = Number(params.get('padY') ?? 0.58)
+      /** Spell VFX bake: hide champion skinned mesh (Wind Wall, etc.). */
+      const hideSkin = params.get('hideSkin') === '1'
+
+      const canvas = document.getElementById('c')
+      const renderer = new THREE.WebGLRenderer({
+        canvas,
+        antialias: true,
+        alpha: true,
+        preserveDrawingBuffer: true,
+        powerPreference: 'high-performance',
+      })
+      renderer.setPixelRatio(1)
+      renderer.setSize(frameW, frameH, false)
+      renderer.outputColorSpace = THREE.SRGBColorSpace
+      renderer.toneMapping = THREE.ACESFilmicToneMapping
+      renderer.toneMappingExposure = 1.05
+      renderer.shadowMap.enabled = true
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap
+      renderer.setClearColor(0x000000, 0)
+
+      const scene = new THREE.Scene()
+      const aspect = frameW / frameH
+      let orthoHalf = 1.1
+      const camera = new THREE.OrthographicCamera(
+        (-orthoHalf * aspect) / 1,
+        (orthoHalf * aspect) / 1,
+        orthoHalf,
+        -orthoHalf,
+        0.05,
+        200,
+      )
+      const CAM_DIST = 26
+      const CAM_TILT = 0.42
+      camera.position.set(0, Math.cos(CAM_TILT) * CAM_DIST, Math.sin(CAM_TILT) * CAM_DIST)
+      camera.up.set(0, 1, 0)
+      camera.lookAt(0, 0.92, 0)
+
+      const hemi = new THREE.HemisphereLight(0xfff4e8, 0x2a3050, 0.95)
+      scene.add(hemi)
+
+      const key = new THREE.DirectionalLight(0xffffff, 1.65)
+      key.position.set(5, 22, 8)
+      key.castShadow = true
+      key.shadow.mapSize.set(1024, 1024)
+      key.shadow.camera.near = 1
+      key.shadow.camera.far = 60
+      key.shadow.camera.left = -4
+      key.shadow.camera.right = 4
+      key.shadow.camera.top = 4
+      key.shadow.camera.bottom = -4
+      key.shadow.bias = -0.0008
+      scene.add(key)
+
+      const rim = new THREE.DirectionalLight(0x88bbff, 0.45)
+      rim.position.set(-7, 14, -6)
+      scene.add(rim)
+
+      const fillLight = new THREE.DirectionalLight(0xffe8cc, 0.35)
+      fillLight.position.set(-4, 8, 10)
+      scene.add(fillLight)
+
+      const shadowGround = new THREE.Mesh(
+        new THREE.PlaneGeometry(8, 8),
+        new THREE.ShadowMaterial({ opacity: 0.38 }),
+      )
+      shadowGround.rotation.x = -Math.PI / 2
+      shadowGround.position.y = 0.001
+      shadowGround.receiveShadow = true
+      scene.add(shadowGround)
+
+      let root = null
+      let mixer = null
+      let clips = []
+      const basePosition = new THREE.Vector3()
+      const tmpBox = new THREE.Box3()
+      const tmpV = new THREE.Vector3()
+
+      function setMaxAnisotropy(object3d) {
+        const max = renderer.capabilities.getMaxAnisotropy()
+        object3d.traverse((child) => {
+          if (!child.isMesh) return
+          const materials = Array.isArray(child.material) ? child.material : [child.material]
+          for (const mat of materials) {
+            if (mat?.map) mat.map.anisotropy = max
+          }
+          child.castShadow = true
+          child.receiveShadow = false
+        })
+      }
+
+      function centerOnGround(object3d) {
+        tmpBox.setFromObject(object3d)
+        const center = tmpBox.getCenter(new THREE.Vector3())
+        object3d.position.x -= center.x
+        object3d.position.z -= center.z
+        object3d.position.y -= tmpBox.min.y
+        basePosition.copy(object3d.position)
+      }
+
+      function anchorFeet(object3d) {
+        tmpBox.setFromObject(object3d)
+        const center = tmpBox.getCenter(tmpV)
+        object3d.position.x += basePosition.x - center.x
+        object3d.position.z += basePosition.z - center.z
+        object3d.position.y += basePosition.y - tmpBox.min.y
+      }
+
+      function setHideChampionMeshes(hidden) {
+        if (!root) return
+        root.traverse((child) => {
+          if (child.isSkinnedMesh) {
+            child.visible = !hidden
+          }
+        })
+      }
+
+      function projectedSpan(object3d) {
+        tmpBox.makeEmpty()
+        let hasMesh = false
+        object3d.traverse((child) => {
+          if (!child.isMesh || !child.visible) return
+          tmpBox.expandByObject(child)
+          hasMesh = true
+        })
+        if (!hasMesh) {
+          tmpBox.setFromObject(object3d)
+        }
+        const corners = [
+          new THREE.Vector3(tmpBox.min.x, tmpBox.min.y, tmpBox.min.z),
+          new THREE.Vector3(tmpBox.min.x, tmpBox.min.y, tmpBox.max.z),
+          new THREE.Vector3(tmpBox.min.x, tmpBox.max.y, tmpBox.min.z),
+          new THREE.Vector3(tmpBox.min.x, tmpBox.max.y, tmpBox.max.z),
+          new THREE.Vector3(tmpBox.max.x, tmpBox.min.y, tmpBox.min.z),
+          new THREE.Vector3(tmpBox.max.x, tmpBox.min.y, tmpBox.max.z),
+          new THREE.Vector3(tmpBox.max.x, tmpBox.max.y, tmpBox.min.z),
+          new THREE.Vector3(tmpBox.max.x, tmpBox.max.y, tmpBox.max.z),
+        ]
+        let minX = Infinity
+        let maxX = -Infinity
+        let minY = Infinity
+        let maxY = -Infinity
+        for (const c of corners) {
+          tmpV.copy(c)
+          tmpV.project(camera)
+          minX = Math.min(minX, tmpV.x)
+          maxX = Math.max(maxX, tmpV.x)
+          minY = Math.min(minY, tmpV.y)
+          maxY = Math.max(maxY, tmpV.y)
+        }
+        const wNdc = maxX - minX
+        const hNdc = maxY - minY
+        return Math.max(wNdc, hNdc / aspect)
+      }
+
+      function applyStableOrtho(half) {
+        orthoHalf = half
+        camera.left = -orthoHalf * aspect
+        camera.right = orthoHalf * aspect
+        camera.top = orthoHalf
+        camera.bottom = -orthoHalf
+        camera.updateProjectionMatrix()
+      }
+
+      function findClip(name) {
+        const exact = clips.find((c) => c.name === name)
+        if (exact) return exact
+        const lower = name.toLowerCase()
+        return clips.find((c) => c.name.toLowerCase() === lower)
+      }
+
+      function applyPose({ clipName, timeSec, rotationY }) {
+        root.position.copy(basePosition)
+        root.rotation.set(0, rotationY, 0)
+        const clip = findClip(clipName)
+        if (mixer) mixer.stopAllAction()
+        mixer = new THREE.AnimationMixer(root)
+        if (clip) {
+          const action = mixer.clipAction(clip)
+          action.play()
+          action.paused = true
+          action.time = timeSec
+          mixer.update(0)
+        }
+        root.updateMatrixWorld(true)
+        anchorFeet(root)
+        if (framePadY) {
+          root.position.y += framePadY
+        }
+      }
+
+      function computeStableOrthoHalf(samples) {
+        let maxSpan = 0
+        for (const s of samples) {
+          applyPose(s)
+          maxSpan = Math.max(maxSpan, projectedSpan(root))
+        }
+        return maxSpan / (2 * fill)
+      }
+
+      const loader = new GLTFLoader()
+      loader.load(
+        glbUrl,
+        (gltf) => {
+          root = gltf.scene
+          clips = gltf.animations
+          scene.add(root)
+          setMaxAnisotropy(root)
+          centerOnGround(root)
+          if (hideSkin) {
+            setHideChampionMeshes(true)
+            shadowGround.visible = false
+          }
+
+          const clipDurations = Object.fromEntries(
+            clips.map((c) => [c.name, c.duration]),
+          )
+          window.__jinxBake = {
+            ready: true,
+            clipNames: clips.map((c) => c.name),
+            clipDurations,
+            frameW,
+            frameH,
+            fill,
+            framesPerRow,
+          }
+          window.__applyPose = applyPose
+          window.__computeStableOrthoHalf = computeStableOrthoHalf
+          window.__applyStableOrtho = applyStableOrtho
+        },
+        undefined,
+        (err) => {
+          window.__jinxBake = { ready: false, error: String(err) }
+        },
+      )
+
+      function renderFrame({ clipName, timeSec, rotationY }) {
+        if (!root) return null
+        applyPose({ clipName, timeSec, rotationY })
+        renderer.render(scene, camera)
+        return canvas.toDataURL('image/png')
+      }
+
+      window.__renderJinxFrame = renderFrame
+    </script>
+  </body>
+</html>

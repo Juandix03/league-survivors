@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <title>Jinx W — PNG proyectil</title>
+    <style>
+      body { font-family: system-ui, sans-serif; background: #111; color: #eee; padding: 1rem; }
+      .row { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 1rem; }
+      .panel { border: 1px solid #444; border-radius: 8px; padding: 12px; min-width: 260px; }
+      .swatch { height: 140px; display: flex; align-items: center; justify-content: center; margin-top: 8px; border-radius: 6px; }
+      .light { background: #e8e4dc; }
+      .dark { background: #2a2a2a; }
+      img { max-width: 220px; max-height: 120px; }
+      .add { mix-blend-mode: screen; }
+      p { max-width: 52rem; color: #aab; line-height: 1.45; font-size: 0.9rem; }
+    </style>
+  </head>
+  <body>
+    <h1>PNG integrado: <code>jinx_w_zap_sprite.png</code></h1>
+    <p>
+      No se encontró un PNG “listo” en Wikimedia/Google. Este sprite se generó desde
+      <code>jinx_base_w_lightning01.png</code> (CommunityDragon, skin clásica).
+      Ver <code>public/assets/vfx/jinx/w-projectile/SOURCE.md</code>.
+    </p>
+    <div class="row">
+      <div class="panel">
+        <strong>Fondo claro</strong>
+        <div class="swatch light"><img class="add" src="/assets/vfx/jinx/w-projectile/jinx_w_zap_sprite.png" alt="" /></div>
+      </div>
+      <div class="panel">
+        <strong>Fondo oscuro</strong>
+        <div class="swatch dark"><img class="add" src="/assets/vfx/jinx/w-projectile/jinx_w_zap_sprite.png" alt="" /></div>
+      </div>
+      <div class="panel">
+        <strong>Descartado: UV map</strong>
+        <div class="swatch dark"><img src="/assets/vfx/jinx/w-projectile/jinx_skin02_w_rocket.png" alt="" style="max-height:100px" /></div>
+      </div>
+    </div>
+  </body>
+</html>
