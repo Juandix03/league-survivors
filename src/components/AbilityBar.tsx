@@ -65,8 +65,12 @@ export function AbilityBar({ slots, championId = 'jinx' }: AbilityBarProps) {
               <span className="ability-hotkey-badge" aria-hidden>
                 {slot.hotkey}
               </span>
-              {slot.level > 0 ? (
-                <span className="ability-level-badge" aria-hidden>
+              {slot.level > 1 ? (
+                <span
+                  className="ability-level-badge"
+                  aria-hidden
+                  title={`Nivel ${slot.level}`}
+                >
                   {slot.level}
                 </span>
               ) : null}
